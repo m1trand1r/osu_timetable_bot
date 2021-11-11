@@ -2,3 +2,4 @@ venv
 .idea
 __pycache__/
 src/config.py
+src/test.py

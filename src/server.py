@@ -12,6 +12,9 @@ from config import TOKEN
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
+# для json запроса
+req = "https://www.osu.ru/pages/schedule/?who=1&what=1&bot=1&filial=1&group=11852&mode=full"
+
 
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
