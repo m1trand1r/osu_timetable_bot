@@ -1,16 +1,22 @@
 import os
 
 from aiogram import Bot, types
-from aiogram.dispatcher import Dispatcher
+from aiogram.dispatcher import Dispatcher, FSMContext
+from aiogram.dispatcher.filters import Text
 from aiogram.utils import executor
 
 from config import TOKEN
+from state_holders import StudentProcessor, TeacherProcessor
+from value_holders import Student, Teacher
 
 # Config string for docker image
 # TG_API_TOKEN = os.getenv("TELEGRAM_API_TOKEN")
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
+
+state_holder = None
+value_holder = None
 
 # для json запроса
 req = "https://www.osu.ru/pages/schedule/?who=1&what=1&bot=1&filial=1&group=11852&mode=full"
