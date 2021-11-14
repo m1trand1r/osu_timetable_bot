@@ -4,3 +4,5 @@ __pycache__/
 src/config.py
 src/test.py
 test_f
+todo.txt
+my.Dockerfile
