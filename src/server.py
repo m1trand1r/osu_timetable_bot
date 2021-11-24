@@ -6,8 +6,8 @@ from aiogram.dispatcher.filters import Text
 from aiogram.utils import executor
 
 from config import TOKEN
-from state_holders import StudentProcessor, TeacherProcessor
-from value_holders import Student, Teacher
+from state_holders import StateHolder
+from value_holders import ValueHolder
 
 # Config string for docker image
 # TG_API_TOKEN = os.getenv("TELEGRAM_API_TOKEN")
@@ -15,14 +15,14 @@ from value_holders import Student, Teacher
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
-state_holder = None
-value_holder = None
+state_holder = StateHolder()
+value_holder = ValueHolder()
 
 # для json запроса
 req = "https://www.osu.ru/pages/schedule/?who=1&what=1&bot=1&filial=1&group=11852&mode=full"
 
 
-@dp.message_handler(commands=['start'])
+@dp.message_handler(lambda call: call.data.startswith(''))
 async def process_start_command(message: types.Message):
     markup = types.InlineKeyboardMarkup()
     student = types.InlineKeyboardButton('Студент', callback_data='type_student')
