@@ -15,6 +15,9 @@ class Teacher:
 
 class ValueHolder:
     def __init__(self):
+        self.chat_id_holder = None
+        self.message_id_holder = None
+        self.filial = None
         self.client = None
         self.who = None
 
@@ -24,3 +27,13 @@ class ValueHolder:
             self.client = Student()
         else:
             self.client = Teacher()
+
+
+class SelectorsHolder:
+    def __init__(self):
+        self.filial, self.filial_reversed = None, None
+        self.faculty, self.faculty_reversed = None, None
+        self.who_reversed = {'student': 1, 'teacher': 2}
+        self.course, self.course_reversed = None, None
+        self.groups, self.groups_reversed = None, None
+        self.teacher, self.teacher_reversed = None, None

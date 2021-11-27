@@ -18,7 +18,7 @@ class Scraper:
         values_swapped = {}
 
         for i in a_parts:
-            print(i.attrs['href'][1:].split('=')[1])
+            # print(i.attrs['href'][1:].split('=')[1])
             values[i.text] = int(i.attrs['href'][1:].split('=')[1])
             values_swapped[i.attrs['href'][1:].split('=')[1]] = i.text
         return values, values_swapped
@@ -81,6 +81,6 @@ class Scraper:
 
 
 
-sc = Scraper()
-x, y = sc.get_groups(1, 1, 6543, 2018)
-print(x, y, sep='\n')
+# sc = Scraper()
+# x, y = sc.get_groups(1, 1, 6543, 2018)
+# print(x, y, sep='\n')
