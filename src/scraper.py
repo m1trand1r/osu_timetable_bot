@@ -66,30 +66,38 @@ class Scraper:
         return data, data_swapped
 
     def get_groups_teachers(self, who: int, filial: int, faculty_id: int, course_id: int):
-        to_send = {
+        to_send_student = {
             'who': who,
             'what': 1,
-            'request': 'group' if who == 1 else 'prep',
+            'request': 'group',
             'filial': filial,
             'mode': 'full',
             'facult': faculty_id,
             'potok': course_id
         }
-        page = requests.post(self.url_for_requests, data=to_send)
+        to_send_teacher = {
+            'who': who,
+            'what': 1,
+            'request': 'prep',
+            'filial': filial,
+            'mode': 'full',
+            'facult': faculty_id,
+            'kafedra': course_id
+        }
+        page = requests.post(self.url_for_requests, data=to_send_teacher if who == 2 else to_send_student)
         bsObj = BeautifulSoup(page.text, features='html.parser')
-        values = bsObj.find_all('option', {'value': True, 'onclick': True, 'title': False})
         data = {}
         data_swapped = {}
-        for value in values:
-            if 'rasp' in value.attrs['onclick']:
-                data.setdefault(value.text, int(value.attrs['value']))
-                data_swapped.setdefault(value.attrs['value'], value.text)
+        if who == 1:
+            values = bsObj.find_all('option', {'value': True, 'onclick': True, 'title': False})
+            for value in values:
+                if 'rasp' in value.attrs['onclick']:
+                    data.setdefault(value.text, int(value.attrs['value']))
+                    data_swapped.setdefault(value.attrs['value'], value.text)
+        else:
+            values = bsObj.find_all('option', {'value': True, 'onclick': True, 'title': True})
+            for value in values:
+                if value.attrs['onclick'].count('rasp') > 0 and who == 2:
+                    data.setdefault(value.text, int(value.attrs['value']))
+                    data_swapped.setdefault(value.attrs['value'], value.text)
         return data, data_swapped
-
-
-#
-#
-# #
-# sc = Scraper()
-# x, y = sc.get_courses_chairs(1, 1, 6543)
-# print(x, y, sep='\n')

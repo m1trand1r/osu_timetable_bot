@@ -58,6 +58,19 @@ def choose_course_chair():
     return items
 
 
+def choose_group_teacher():
+    if selectors.groups_teachers is None and selectors.groups_teachers_reversed is None:
+        selectors.groups_teachers, selectors.groups_teachers_reversed = req.get_groups_teachers(value_holder.who,
+                                                                                                value_holder.filial,
+                                                                                                value_holder.faculty,
+                                                                                                value_holder.course if value_holder.who == 1 else value_holder.chair
+                                                                                                )
+    items = [types.InlineKeyboardButton(value, callback_data='Gcall_' + str(value)) for value in
+             selectors.groups_teachers]
+    items.append(types.InlineKeyboardButton('Назад', callback_data='cGcall'))
+    return items
+
+
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
     """
@@ -102,7 +115,7 @@ async def process_faculty_command(call: types.CallbackQuery):
     await bot.edit_message_text(chat_id=value_holder.chat_id_holder,
                                 message_id=value_holder.message_id_holder,
                                 text=f'Выбранный филиал - {selectors.filial_reversed[str(value_holder.filial)]}\n'
-                                     f'Вы - {selectors.who_reversed[value_holder.who]}\n'
+                                     f'Вы - {selectors.who[str(value_holder.who)]}\n'
                                      f'Выберите факультет:',
                                 reply_markup=markup
                                 )
@@ -118,7 +131,7 @@ async def process_course_command(call: types.CallbackQuery):
         await bot.edit_message_text(chat_id=value_holder.chat_id_holder,
                                     message_id=value_holder.message_id_holder,
                                     text=f'Выбранный филиал - {selectors.filial_reversed[str(value_holder.filial)]}\n'
-                                         f'Вы - {selectors.who_reversed[value_holder.who]}\n'
+                                         f'Вы - {selectors.who[str(value_holder.who)]}\n'
                                          f'Выбранный факультет - {selectors.faculty_reversed[str(value_holder.faculty)]}\n'
                                          f'Выберите курс:',
                                     reply_markup=markup
@@ -127,9 +140,40 @@ async def process_course_command(call: types.CallbackQuery):
         await bot.edit_message_text(chat_id=value_holder.chat_id_holder,
                                     message_id=value_holder.message_id_holder,
                                     text=f'Выбранный филиал - {selectors.filial_reversed[str(value_holder.filial)]}\n'
-                                         f'Вы - {selectors.who_reversed[value_holder.who]}\n'
+                                         f'Вы - {selectors.who[str(value_holder.who)]}\n'
                                          f'Выбранный факультет - {selectors.faculty_reversed[str(value_holder.faculty)]}\n'
                                          f'Выберите кафедру:',
+                                    reply_markup=markup
+                                    )
+
+
+@dp.callback_query_handler(lambda call: call.data.startswith('CCcall_'))
+async def process_group_command(call):
+    if value_holder.who == 1:
+        value_holder.course = selectors.course_chair[call.data.split('_')[1]]
+    else:
+        value_holder.chair = selectors.course_chair[call.data.split('_')[1]]
+    items = choose_group_teacher()
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    markup.add(*items)
+    if value_holder.who == 1:
+        await bot.edit_message_text(chat_id=value_holder.chat_id_holder,
+                                    message_id=value_holder.message_id_holder,
+                                    text=f'Выбранный филиал - {selectors.filial_reversed[str(value_holder.filial)]}\n'
+                                         f'Вы - {selectors.who[str(value_holder.who)]}\n'
+                                         f'Выбранный факультет - {selectors.faculty_reversed[str(value_holder.faculty)]}\n'
+                                         f'Выбранный курс - {selectors.course_chair_reversed[str(value_holder.course)]}\n'
+                                         f'Выберите группу:',
+                                    reply_markup=markup
+                                    )
+    else:
+        await bot.edit_message_text(chat_id=value_holder.chat_id_holder,
+                                    message_id=value_holder.message_id_holder,
+                                    text=f'Выбранный филиал - {selectors.filial_reversed[str(value_holder.filial)]}\n'
+                                         f'Вы - {selectors.who[str(value_holder.who)]}\n'
+                                         f'Выбранный факультет - {selectors.faculty_reversed[str(value_holder.faculty)]}\n'
+                                         f'Выбранная кафедра - {selectors.course_chair_reversed[str(value_holder.chair)]}\n'
+                                         f'Выберите преподавателя:',
                                     reply_markup=markup
                                     )
 
@@ -172,14 +216,43 @@ async def process_to_faculty_back(call):
     markup.add(*items)
     selectors.course_chair = None
     selectors.course_chair_reversed = None
+    value_holder.faculty = None
     await bot.edit_message_text(chat_id=value_holder.chat_id_holder,
                                 message_id=value_holder.message_id_holder,
                                 text=f'Выбранный филиал - {selectors.filial_reversed[str(value_holder.filial)]}\n'
+                                     f'Вы - {selectors.who[str(value_holder.who)]}\n'
                                      f'Выберите факультет:',
                                 reply_markup=markup
                                 )
 
 
+@dp.callback_query_handler(lambda call: call.data.startswith('cGcall'))
+async def process_to_course_back(call: types.CallbackQuery):
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    items = choose_course_chair()
+    markup.add(*items)
+    value_holder.course = None
+    value_holder.chair = None
+    selectors.groups_teachers = None
+    selectors.groups_teachers_reversed = None
+    if value_holder.who == 1:
+        await bot.edit_message_text(chat_id=value_holder.chat_id_holder,
+                                    message_id=value_holder.message_id_holder,
+                                    text=f'Выбранный филиал - {selectors.filial_reversed[str(value_holder.filial)]}\n'
+                                         f'Вы - {selectors.who[str(value_holder.who)]}\n'
+                                         f'Выбранный факультет - {selectors.faculty_reversed[str(value_holder.faculty)]}\n'
+                                         f'Выберите курс:',
+                                    reply_markup=markup
+                                    )
+    else:
+        await bot.edit_message_text(chat_id=value_holder.chat_id_holder,
+                                    message_id=value_holder.message_id_holder,
+                                    text=f'Выбранный филиал - {selectors.filial_reversed[str(value_holder.filial)]}\n'
+                                         f'Вы - {selectors.who[str(value_holder.who)]}\n'
+                                         f'Выбранный факультет - {selectors.faculty_reversed[str(value_holder.faculty)]}\n'
+                                         f'Выберите кафедру:',
+                                    reply_markup=markup
+                                    )
 # @dp.callback_query_handler(lambda call: call.data.startswith('type_'))
 # async def choose_faculty(call: types.CallbackQuery):
 #     await bot.send_message(call.message.chat.id,

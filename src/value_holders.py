@@ -32,5 +32,4 @@ class SelectorsHolder:
         self.faculty, self.faculty_reversed = None, None
         self.who, self.who_reversed = {'1': 'student', '2': 'teacher'}, {'student': 1, 'teacher': 2}
         self.course_chair, self.course_chair_reversed = None, None
-        self.groups, self.groups_reversed = None, None
-        self.teacher, self.teacher_reversed = None, None
+        self.groups_teachers, self.groups_teachers_reversed = None, None
