@@ -37,30 +37,39 @@ class Scraper:
             values_swapped.setdefault(tag.attrs['value'], tag.text)
         return values, values_swapped
 
-    def get_courses(self, who: int, filial: int, faculty_id: int):
+    def get_courses_chairs(self, who: int, filial: int, faculty_id: int):
         to_send = {
             'who': who,
             'what': 1,
-            'request': 'potok',  # group для группы, potok для курса
+            'request': 'potok' if who == 1 else 'kafedra',  # group для группы, potok для курса, prep для преподавателя
             'filial': filial,
             'mode': 'full',
             'facult': faculty_id
         }
         page = requests.post(self.url_for_requests, data=to_send)
         bsObj = BeautifulSoup(page.text, features="html.parser")
-        values = bsObj.find_all('option', {'value': True, 'onclick': True, 'title': False})
         data = {}
         data_swapped = {}
-        for value in values:
-            data.setdefault(value.text, int(value.attrs['value']))
-            data_swapped.setdefault(value.attrs['value'], value.text)
+        if who == 1:
+            values = bsObj.find_all('option', {'value': True, 'onclick': True, 'title': False})
+
+            for value in values:
+                data.setdefault(value.text, int(value.attrs['value']))
+                data_swapped.setdefault(value.attrs['value'], value.text)
+        else:
+            values = bsObj.find_all('option', {'value': True, 'onclick': True, 'title': True})
+            for value in values:
+                if value.attrs['onclick'].count('prep') > 0 and who == 2:
+                    data.setdefault(value.text, int(value.attrs['value']))
+                    data_swapped.setdefault(value.attrs['value'], value.text)
+
         return data, data_swapped
 
-    def get_groups(self, who: int, filial: int, faculty_id: int, course_id: int):
+    def get_groups_teachers(self, who: int, filial: int, faculty_id: int, course_id: int):
         to_send = {
             'who': who,
             'what': 1,
-            'request': 'group',
+            'request': 'group' if who == 1 else 'prep',
             'filial': filial,
             'mode': 'full',
             'facult': faculty_id,
@@ -78,9 +87,9 @@ class Scraper:
         return data, data_swapped
 
 
-
-
-
+#
+#
+# #
 # sc = Scraper()
-# x, y = sc.get_groups(1, 1, 6543, 2018)
+# x, y = sc.get_courses_chairs(1, 1, 6543)
 # print(x, y, sep='\n')
